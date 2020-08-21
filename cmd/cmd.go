@@ -3,6 +3,7 @@ package cmd
 import (
 	"fanyi/config"
 	"fanyi/print"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,8 +14,21 @@ import (
 )
 
 func Execute() {
-	args := os.Args[1:]
-	queryString := strings.Join(args, " ")
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s word\n\n", os.Args[0])
+		flag.PrintDefaults()
+		eg := `Examples:
+  $ fanyi word
+  $ fanyi world peace
+  $ fanyi chinglish`
+		fmt.Println(eg)
+	}
+	flag.Parse()
+	if len(os.Args[1:]) == 0 {
+		flag.Usage()
+		return
+	}
+	queryString := strings.Join(flag.Args(), " ")
 	queryString = url.QueryEscape(queryString)
 	fmt.Println()
 	ch := make(chan string)
