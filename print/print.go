@@ -7,6 +7,7 @@ import (
 	"github.com/gookit/color"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -43,24 +44,23 @@ func Youdao(data []byte) {
 	} else {
 		phoneticStr = fmt.Sprintf("[ %s ]", magenta(phonetic))
 	}
-	fmt.Printf("%s %s %s\n\n", query, phoneticStr, gray("~  fanyi.youdao.com"))
+	fmt.Printf(" %s %s %s\n\n", query, phoneticStr, gray("~  fanyi.youdao.com"))
 	explains, _ := json.Get("basic").Get("explains").Array()
 	for _, value := range explains {
-		fmt.Printf("%s%s\n", gray("- "), green(value))
+		fmt.Printf(" %s %s\n", gray("-"), green(value))
 	}
 	fmt.Println()
 	web, _ := json.Get("web").Array()
 	for i, value := range web {
 		val := value.(map[string]interface{})
-		line1 := fmt.Sprintf("%d. %s", i+1, highlight(val["key"].(string), query))
-		fmt.Println(line1)
+		fmt.Printf(" %s %s\n", gray(strconv.Itoa(i+1)+"."), highlight(val["key"].(string), query))
 		valuelen := len(val["value"].([]interface{}))
 		valArr := make([]string, valuelen)
 		for i, value := range val["value"].([]interface{}) {
 			valArr[i] = value.(string)
 		}
 		valueStr := strings.Join(valArr, ", ")
-		fmt.Printf("   %s\n", cyan(valueStr))
+		fmt.Printf("    %s\n", cyan(valueStr))
 	}
 	fmt.Println()
 	fmt.Println(gray("   --------"))
@@ -82,14 +82,14 @@ func Iciba(data []byte) {
 			phoneticStr += "美" + "[ " + value + "] "
 		}
 	}
-	fmt.Printf("%s %s %s\n\n", v.Key, magenta(phoneticStr), gray("~  iciba.com"))
+	fmt.Printf(" %s %s %s\n\n", v.Key, magenta(phoneticStr), gray("~  iciba.com"))
 	for i := 0; i < len(v.Pos); i++ {
-		fmt.Printf("- %s %s", cyan(v.Pos[i]), cyan(v.Acceptation[i]))
+		fmt.Printf(" %s %s %s", gray("-"), green(v.Pos[i]), green(v.Acceptation[i]))
 	}
 	fmt.Println()
 	for i := 0; i < len(v.Sent); i++ {
-		fmt.Printf("1. %s\n", highlight(del(v.Sent[i].Orig), v.Key))
-		fmt.Printf("   %s\n", cyan(del(v.Sent[i].Trans)))
+		fmt.Printf(" %s %s\n", gray(strconv.Itoa(i+1)+"."), highlight(del(v.Sent[i].Orig), v.Key))
+		fmt.Printf("    %s\n", cyan(del(v.Sent[i].Trans)))
 	}
 	fmt.Println()
 	fmt.Println(gray("   --------"))
