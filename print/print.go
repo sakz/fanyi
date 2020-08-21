@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type IcibaResp struct {
@@ -83,8 +84,10 @@ func Iciba(data []byte) {
 		}
 	}
 	fmt.Printf(" %s %s %s\n\n", v.Key, magenta(phoneticStr), gray("~  iciba.com"))
-	for i := 0; i < len(v.Pos); i++ {
-		fmt.Printf(" %s %s %s", gray("-"), green(v.Pos[i]), green(v.Acceptation[i]))
+	if !isChinese(v.Key) {
+		for i := 0; i < len(v.Pos); i++ {
+			fmt.Printf(" %s %s %s", gray("-"), green(v.Pos[i]), green(v.Acceptation[i]))
+		}
 	}
 	fmt.Println()
 	for i := 0; i < len(v.Sent); i++ {
@@ -118,4 +121,15 @@ func del(str string) string {
 	r := regexp.MustCompile("\n")
 	res := r.ReplaceAllString(str, "")
 	return res
+}
+
+// 是否包含中文
+func isChinese(str string) bool {
+	count := 0
+	for _, v := range str {
+		if unicode.Is(unicode.Han, v) {
+			count++
+		}
+	}
+	return count > 0
 }
