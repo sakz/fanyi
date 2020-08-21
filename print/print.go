@@ -1,6 +1,7 @@
 package print
 
 import (
+	"encoding/xml"
 	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/gookit/color"
@@ -9,12 +10,27 @@ import (
 	"strings"
 )
 
-func Youdao(data []byte) {
-	magenta := color.FgMagenta.Render
-	gray := color.FgGray.Render
-	green := color.FgGreen.Render
-	cyan := color.FgCyan.Render
+type IcibaResp struct {
+	//xmlName     xml.Name `xml:"dict"`
+	Key         string   `xml:"key"`
+	Ps          []string `xml:"ps"`
+	Pron        []string `xml:"pron"`
+	Pos         []string `xml:"pos"`
+	Acceptation []string `xml:"acceptation"`
+	Sent        []Sent   `xml:"sent"`
+}
 
+type Sent struct {
+	Orig  string `xml:"orig"`
+	Trans string `xml:"trans"`
+}
+
+var magenta = color.FgMagenta.Render
+var gray = color.FgGray.Render
+var green = color.FgGreen.Render
+var cyan = color.FgCyan.Render
+
+func Youdao(data []byte) {
 	json, err := simplejson.NewJson(data)
 	if err != nil {
 		log.Fatal(err)
@@ -39,21 +55,67 @@ func Youdao(data []byte) {
 		line1 := fmt.Sprintf("%d. %s", i+1, highlight(val["key"].(string), query))
 		fmt.Println(line1)
 		valuelen := len(val["value"].([]interface{}))
-		valArr := make([]string, valuelen, valuelen)
+		valArr := make([]string, valuelen)
 		for i, value := range val["value"].([]interface{}) {
 			valArr[i] = value.(string)
 		}
 		valueStr := strings.Join(valArr, ", ")
 		fmt.Printf("   %s\n", cyan(valueStr))
 	}
+	fmt.Println()
+	fmt.Println(gray("   --------"))
+	fmt.Println()
 }
 
+func Iciba(data []byte) {
+	v := IcibaResp{}
+	err := xml.Unmarshal(data, &v)
+	if err != nil {
+		fmt.Printf("error: %v", err)
+		return
+	}
+	var phoneticStr string
+	for i, value := range v.Ps {
+		if i == 0 {
+			phoneticStr += "英" + "[ " + value + "] "
+		} else {
+			phoneticStr += "美" + "[ " + value + "] "
+		}
+	}
+	fmt.Printf("%s %s %s\n\n", v.Key, magenta(phoneticStr), gray("~  iciba.com"))
+	for i := 0; i < len(v.Pos); i++ {
+		fmt.Printf("- %s %s", cyan(v.Pos[i]), cyan(v.Acceptation[i]))
+	}
+	fmt.Println()
+	for i := 0; i < len(v.Sent); i++ {
+		fmt.Printf("1. %s\n", highlight(del(v.Sent[i].Orig), v.Key))
+		fmt.Printf("   %s\n", cyan(del(v.Sent[i].Trans)))
+	}
+	fmt.Println()
+	fmt.Println(gray("   --------"))
+	fmt.Println()
+}
+
+// 高亮句子中的单词
 func highlight(str string, query string) string {
 	yellow := color.FgYellow.Render
-	r := regexp.MustCompile("(?i)" + query)
-	f := func(s string) string {
-		return yellow(s)
-	}
-	res := r.ReplaceAllStringFunc(str, f)
+	//r := regexp.MustCompile("(?i)" + query)
+	//f := func(s string) string {
+	//	return yellow(s)
+	//}
+	//res := r.ReplaceAllStringFunc(str, f)
+
+	// 句子中单词用黄色，其他用灰色
+	r := regexp.MustCompile("(?i)" + "(.*)" + "(" + query + ")" + "(.*)")
+	res1 := r.ReplaceAllString(str, "$1$2"+gray("$3"))
+	r2 := regexp.MustCompile("(?i)" + "(.*?)" + "(" + query + ")")
+	res2 := r2.ReplaceAllString(res1, gray("$1")+yellow("$2"))
+	return res2
+}
+
+// 删除string中的换行符
+func del(str string) string {
+	r := regexp.MustCompile("\n")
+	res := r.ReplaceAllString(str, "")
 	return res
 }
