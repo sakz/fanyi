@@ -3,13 +3,15 @@ A translate tool in your command line
 
 ## Install
 For macOs
+
 ```bash
 $ brew install sakz/tap/fanyi
 ```
 For Linux
 
-You can download from the releases page, put the executable file `fanyi` to `/usr/local/bin`
-, then you can use it as belows.
+```bash
+$ source <(curl -sL https://git.io/fanyi-install)
+```
 
 ## Usage
 
@@ -23,7 +25,7 @@ Usage: fanyi word
 Examples:
   $ fanyi word
   $ fanyi world peace
-  $ fanyi chinglish
+  $ fanyi 中文
 ```
 
 > translate English word

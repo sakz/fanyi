@@ -5,6 +5,7 @@ import (
 	"fanyi/print"
 	"flag"
 	"fmt"
+	"github.com/atotto/clipboard"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,15 +21,23 @@ func Execute() {
 		eg := `Examples:
   $ fanyi word
   $ fanyi world peace
-  $ fanyi chinglish`
+  $ fanyi 中文`
 		fmt.Println(eg)
 	}
 	flag.Parse()
+	var queryString string
 	if len(os.Args[1:]) == 0 {
-		flag.Usage()
-		return
+		text, err := clipboard.ReadAll()
+		if err != nil || text == "" {
+			//读取剪切板失败或者没内容
+			flag.Usage()
+			return
+		}
+		fmt.Printf(" \n 默认读取剪贴板: %s\n", text)
+		queryString = text
+	} else {
+		queryString = strings.Join(flag.Args(), " ")
 	}
-	queryString := strings.Join(flag.Args(), " ")
 	queryString = url.QueryEscape(queryString)
 	fmt.Println()
 	ch := make(chan string)
