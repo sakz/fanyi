@@ -20,21 +20,8 @@ colorEcho(){
 }
 
 checkSys() {
-    #检查是否为Root
-#    [ $(id -u) != "0" ] && { colorEcho ${RED} "Error: You must be root to run this script"; exit 1; }
     if [[ $(uname -m 2> /dev/null) != x86_64 ]]; then
         colorEcho $YELLOW "Please run this script on x86_64 machine."
-        exit 1
-    fi
-
-    if [[ `command -v apt-get` ]];then
-        PACKAGE_MANAGER='apt-get'
-    elif [[ `command -v dnf` ]];then
-        PACKAGE_MANAGER='dnf'
-    elif [[ `command -v yum` ]];then
-        PACKAGE_MANAGER='yum'
-    else
-        colorEcho $RED "Not support OS!"
         exit 1
     fi
 
@@ -59,7 +46,7 @@ install(){
 }
 
 main(){
-  checkSys
-  install
+    checkSys
+    install
 }
 main
