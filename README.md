@@ -1,5 +1,5 @@
 # fanyi
-A translate tool in your command line
+A translation tool in your command line
 
 ## Install
 For macOs
